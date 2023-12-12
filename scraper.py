@@ -80,7 +80,6 @@ class Scraper:
         self,
         topic,
         last_date: int = 0,
-        start_date: str | int | None = None,
     ):
         ic()
         # ic(last_date)
