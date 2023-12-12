@@ -29,7 +29,7 @@ def run(
 ) -> None:
     parser = Scraper()
     parser.process_categories()
-    file_format = "excel" if excel else "csv"
+    file_format: str = "excel" if excel else "csv"
     parser.process_topics_and_save(file_format=file_format, last_date=lastdays)
 
 

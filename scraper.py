@@ -25,7 +25,7 @@ class Scraper:
     def __init__(
         self,
         last_days: int = 0,
-    ):
+    ) -> None:
         print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} Парсинг запущен...")
         if last_days != 0:
             self.start = datetime.combine(
@@ -39,8 +39,8 @@ class Scraper:
         self.session = requests.Session()
         self.session.headers.update({"User-Agent": self.USER_AGENT})
 
-    def create_csv_file(self, filename_suffix, headers):
-        filename = (
+    def create_csv_file(self, filename_suffix, headers) -> str:
+        filename: str = (
             f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}_{filename_suffix}.csv"
         )
         if not path.exists(filename):
@@ -51,7 +51,7 @@ class Scraper:
 
     def fetch_topics(self):
         ic()
-        url = f"{self.domain}latest.json"
+        url: str = f"{self.domain}latest.json"
         params = {"no_definitions": "true", "page": 0}
 
         while True:
@@ -84,7 +84,7 @@ class Scraper:
         ic()
         # ic(last_date)
         comments_list = []
-        url = f"{self.domain}t/{topic['slug']}/{topic['id']}"
+        url: str = f"{self.domain}t/{topic['slug']}/{topic['id']}"
         print(f"Собираю комментарии со страницы {url}")
 
         start_datetime = None
@@ -129,7 +129,6 @@ class Scraper:
                 else:
                     logging.error("Ошибка при запросе: %s", e, exc_info=True)
                     raise e
-            proposal = {}
             soup = BeautifulSoup(res.text, "html.parser")
             comments = soup.find_all("div", {"class": "crawler-post"})
 
@@ -138,8 +137,7 @@ class Scraper:
                 topic_category.get_text().strip()
                 for topic_category in topic_category_elements
             ]
-            proposal["categories"] = ", ".join(topic_categories) or ""
-
+            proposal = {"categories": ", ".join(topic_categories) or ""}
             next_page_link = None
 
             for i, comment in enumerate(comments):
@@ -155,7 +153,7 @@ class Scraper:
 
                 date = comment.find("time").get("datetime")
                 date = datetime.strptime(date, "%Y-%m-%dT%H:%M:%SZ")
-                comment_date = date.strftime("%Y-%m-%d")
+                comment_date: str = date.strftime("%Y-%m-%d")
 
                 comment_likes = comment.find("meta", itemprop="userInteractionCount")[
                     "content"
@@ -227,7 +225,7 @@ class Scraper:
             print("Categories have been retrieved")
             return data["category_list"]["categories"]
 
-    def process_categories(self):
+    def process_categories(self) -> None:
         ic()
         categories = self.fetch_categories()
         # ic(categories)
@@ -255,15 +253,16 @@ class Scraper:
             if "badges" not in data:
                 return
 
-            user_badges = [badge["name"] for badge in data["badges"]]
-            self.badges[username] = ", ".join(user_badges)
+            self.badges[username] = ", ".join(
+                [badge["name"] for badge in data["badges"]]
+            )
             return self.badges[username]
 
     def fetch_user_status(self, username):
         if username in self.status:
             return self.status[username]
 
-        url = f"{self.domain}u/{username}.json"
+        url: str = f"{self.domain}u/{username}.json"
 
         while True:
             try:
@@ -284,7 +283,7 @@ class Scraper:
             self.status[username] = data["user"]["title"]
             return self.status[username]
 
-    def process_topics(self, limit: int = 0):
+    def process_topics(self, limit: int = 0) -> None:
         ic()
         self.fetch_topics()
         topics_to_process = self.topics if limit == 0 else self.topics[:limit]
@@ -293,9 +292,9 @@ class Scraper:
             ic(len(comments))
             ic(comments)
 
-    def comments_to_dataframe(self, comments_list):
+    def comments_to_dataframe(self, comments_list) -> pd.DataFrame:
         """Converts the comments list to a pandas DataFrame."""
-        df_columns = [
+        df_columns: list[str] = [
             "Proposal/Post name",
             "Proposal Date",
             "Comment Link",
@@ -310,10 +309,9 @@ class Scraper:
             "User's status",
             "User's Badges",
         ]
-        df = pd.DataFrame(comments_list, columns=df_columns)
-        return df
+        return pd.DataFrame(comments_list, columns=df_columns)
 
-    def save_comments(self, comments_list, filename_suffix, file_format="csv"):
+    def save_comments(self, comments_list, filename_suffix, file_format="csv") -> None:
         """
         Saves the comments to a file in the specified format.
 
@@ -327,10 +325,10 @@ class Scraper:
         filename = f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}_{filename_suffix}.{file_format}"
 
         os.makedirs(DOWNLOADS_DIR, exist_ok=True)
-        filename = os.path.join(DOWNLOADS_DIR, filename)
+        filename: str = os.path.join(DOWNLOADS_DIR, filename)
         ic(filename)
 
-        df = self.comments_to_dataframe(comments_list)
+        df: pd.DataFrame = self.comments_to_dataframe(comments_list)
 
         if file_format == "csv":
             df.to_csv(filename, index=False, encoding="utf-8-sig")
@@ -341,7 +339,7 @@ class Scraper:
 
     def process_topics_and_save(
         self, limit: int = 0, file_format="csv", last_date: int = 0
-    ):
+    ) -> None:
         self.fetch_topics()
         topics_to_process = self.topics if limit == 0 else self.topics[:limit]
         comments = []
