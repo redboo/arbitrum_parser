@@ -24,8 +24,6 @@ class Scraper:
 
     def __init__(
         self,
-        start: str | None = None,
-        end: str | None = None,
         last_days: int | None = None,
     ):
         print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} Парсинг запущен...")
@@ -33,9 +31,6 @@ class Scraper:
             self.start = datetime.combine(
                 datetime.now() - timedelta(days=last_days), datetime.min.time()
             )
-        else:
-            self.start = datetime.strptime(start, "%Y%m%d").date() if start else None
-        self.end = datetime.strptime(end, "%Y%m%d").date() if end else None
         self.topics = []
         self.categories = []
         self.badges = {}
