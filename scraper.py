@@ -24,10 +24,10 @@ class Scraper:
 
     def __init__(
         self,
-        last_days: int | None = None,
+        last_days: int = 0,
     ):
         print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} Парсинг запущен...")
-        if last_days is not None:
+        if last_days != 0:
             self.start = datetime.combine(
                 datetime.now() - timedelta(days=last_days), datetime.min.time()
             )
