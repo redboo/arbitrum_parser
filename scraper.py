@@ -242,6 +242,9 @@ class Scraper:
                 response = self.session.get(url, timeout=10)
                 response.raise_for_status()
             except requests.exceptions.HTTPError as e:
+                if e.response.status_code == 404:
+                    self.badges[username] = ""
+                    return self.badges[username]
                 if e.response.status_code != 429:
                     raise
 
@@ -269,6 +272,9 @@ class Scraper:
                 response = self.session.get(url, timeout=10)
                 response.raise_for_status()
             except requests.exceptions.HTTPError as e:
+                if e.response.status_code == 404:
+                    self.status[username] = ""
+                    return self.status[username]
                 if e.response.status_code != 429:
                     raise
 
